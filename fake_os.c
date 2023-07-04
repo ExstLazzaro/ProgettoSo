@@ -119,7 +119,7 @@ void FakeOS_simStep(FakeOS* os){
     }
   }
 
-  
+
 
   // decrement the duration of running
   // if event over, destroy event

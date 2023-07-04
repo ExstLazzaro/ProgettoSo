@@ -7,6 +7,7 @@ FakeOS os;
 
 typedef struct {
   int quantum;
+  int cpus;
 } SchedRRArgs; //STRUTTURA SCHEDULER
 
 void schedRR(FakeOS* os, void* args_){
@@ -14,10 +15,13 @@ void schedRR(FakeOS* os, void* args_){
 
   // look for the first process in ready
   // if none, return
-  if (! os->ready.first)
-    return;
-
-  while(os->ready.first) {
+  if (! os->ready.first) {
+    return; }
+  int k = 0;
+  
+  k = os->running.size;
+  
+  while( ( os->ready.first ) && ( k < (args->cpus ) ) ) {
 
   FakePCB* pcb=(FakePCB*) List_popFront(&os->ready); //FA UN DETACH DEL PRIMO PROCESSO IN LISTA E LO RITORNA
   List_pushBack(&os->running,(ListItem*) pcb);
@@ -38,28 +42,33 @@ void schedRR(FakeOS* os, void* args_){
     qe->duration=args->quantum;
     e->duration-=args->quantum;
     List_pushFront(&pcb->events, (ListItem*)qe);
-  } }
+  }
+  k++;
+  
+   }
 };
 
 int main(int argc, char** argv) { //RICORDA ./PROGRAMMA ARG1 ARG2 ... (ARG[0] È SEMPRE NOME PROGRAMMA)
   FakeOS_init(&os);
   SchedRRArgs srr_args;
   srr_args.quantum=5;
+  srr_args.cpus= atoi(argv[1]);
   os.schedule_args=&srr_args;
   os.schedule_fn=schedRR;
   
-  for (int i=1; i<argc; ++i){
+  for (int i=1; i<argc -1; ++i){
     FakeProcess new_process;
-    int num_events=FakeProcess_load(&new_process, argv[i]);
+    int num_events=FakeProcess_load(&new_process, argv[i+1]);
     printf("loading [%s], pid: %d, events:%d",
-           argv[i], new_process.pid, num_events);
+           argv[i+1], new_process.pid, num_events);
     if (num_events) {
       FakeProcess* new_process_ptr=(FakeProcess*)malloc(sizeof(FakeProcess));
       *new_process_ptr=new_process;
       List_pushBack(&os.processes, (ListItem*)new_process_ptr);
     }
   }
-  printf("num processes in queue %d\n", os.processes.size);
+  printf("\nnum processes in queue %d\n", os.processes.size);
+  printf("\nNumero CPU : %d \n",atoi(argv[1]));
   while(os.running.first
         || os.ready.first
         || os.waiting.first
