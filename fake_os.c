@@ -5,7 +5,7 @@
 #include "fake_os.h"
 
 void FakeOS_init(FakeOS* os) {
-  os->running=0;
+  List_init(&os->ready); //***os->running=0
   List_init(&os->ready);
   List_init(&os->waiting);
   List_init(&os->processes);
@@ -18,7 +18,7 @@ void FakeOS_createProcess(FakeOS* os, FakeProcess* p) { //CREO PROCESSO P CON IL
   assert(p->arrival_time==os->timer && "time mismatch in creation");
   // we check that in the list of PCBs there is no
   // pcb having the same pid
-  assert( (!os->running || os->running->pid!=p->pid) && "pid taken");
+  /* assert( (!os->running || os->running->pid!=p->pid) && "pid taken"); */
 
   ListItem* aux=os->ready.first; //PRENDO PRIMO PROCESSO READY
   while(aux){ //SCORRO FINO A CHE NON ARRIVO ALLA FINE DELLA LISTA READY
@@ -89,10 +89,10 @@ void FakeOS_simStep(FakeOS* os){
     FakePCB* pcb=(FakePCB*)aux; 
     aux=aux->next; //PRENDO PROCESS CONTROL BLOCK DEL MIO AUX POI PUNTO AL NEXT (QUANDO SARA NULL FINIRÀ CICLO)
     ProcessEvent* e=(ProcessEvent*) pcb->events.first;
-    printf("\twaiting pid: %d\n", pcb->pid);
+    printf("\twaiting pid: %d\n", pcb->pid); //--------------------CHI È IN WAIT
     assert(e->type==IO);
-    e->duration--; //DECREMENTO DURATA  BURST IO DI UNO
-    printf("\t\tremaining time:%d\n",e->duration);
+    e->duration--; //DECREMENTO DURATA EVENTO BURST IO
+    printf("\t\tremaining time:%d\n",e->duration); //----------------QUANTO RIMANE DI EVENTO SPECIFICO (IN QUESTO CASO IO)
     if (e->duration==0){//SE HO FINITO, POPPO L'EVENTO E LO LIBERO
       printf("\t\tend burst\n");
       List_popFront(&pcb->events);
@@ -125,48 +125,58 @@ void FakeOS_simStep(FakeOS* os){
   // if event over, destroy event
   // and reschedule process
   // if last event, destroy running
-  FakePCB* running=os->running;
-  printf("\trunning pid: %d\n", running?running->pid:-1);
-  if (running) {
-    ProcessEvent* e=(ProcessEvent*) running->events.first;
+  aux=os->running.first;
+  if(aux == NULL ) {
+    printf("\trunning pid: -1\n");
+  }
+  while (aux) {           //-----------QUA CE IF E NON WHILE.. PERCHE DI RUNNING SOLO UNO PUO ESSERCI
+    FakePCB* pcb=(FakePCB*)aux;
+    aux=aux->next;
+    printf("\trunning pid: %d\n", pcb->pid);
+    ProcessEvent* e=(ProcessEvent*) pcb->events.first;
     assert(e->type==CPU);
     e->duration--; //DECREMENTO DURATA BURST CPU DI UNO
-    printf("\t\tremaining time:%d\n",e->duration);
+    printf("\t\tremaining time:%d\n",e->duration); //----------------QUANTO RIMANE DI EVENTO SPECIFICO (IN QUESTO CASO CPU)
     if (e->duration==0){
       printf("\t\tend burst\n");
-      List_popFront(&running->events);
+      List_popFront(&pcb->events);
       free(e);
-      if (! running->events.first) {
+      List_detach(&os->running, (ListItem*)pcb);
+      if (! pcb->events.first) {
         printf("\t\tend process\n");
-        free(running); // SE ULTIMO EVENTO KILLO
+        free(pcb); // SE ULTIMO EVENTO KILLO
       } else {
-        e=(ProcessEvent*) running->events.first;
+        e=(ProcessEvent*) pcb->events.first;
         switch (e->type){
         case CPU:
           printf("\t\tmove to ready\n");
-          List_pushBack(&os->ready, (ListItem*) running); //SE PROX SARÀ BURST CPU LO RIMETTO ALLA FINE DI READY
+          List_pushBack(&os->ready, (ListItem*) pcb); //SE PROX SARÀ BURST CPU LO RIMETTO ALLA FINE DI READY
           break;
         case IO:
           printf("\t\tmove to waiting\n");
-          List_pushBack(&os->waiting, (ListItem*) running); //SE PROX SARÀ BURST IO LO RIMETTO ALLA FINE DI WAITING
+          List_pushBack(&os->waiting, (ListItem*) pcb); //SE PROX SARÀ BURST IO LO RIMETTO ALLA FINE DI WAITING
           break;
         }
       }
-      os->running = 0;
     }
   }
 
 
   // call schedule, if defined
-  if (os->schedule_fn && ! os->running){
+ // for(int i = 0; i < 2; i++) {
+  if (os->schedule_fn){
     (*os->schedule_fn)(os, os->schedule_args); 
-  }
+  } 
+  //}
 
   // if running not defined and ready queue not empty
   // put the first in ready to run
-  if (! os->running && os->ready.first) {
-    os->running=(FakePCB*) List_popFront(&os->ready);
-  }
+ if (! os->running.first && os->ready.first) {
+     List_pushBack(&os->running, (ListItem*) os->ready.first);
+  } 
+
+
+
 
   ++os->timer;
 

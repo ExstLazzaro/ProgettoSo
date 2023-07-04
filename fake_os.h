@@ -13,7 +13,7 @@ struct FakeOS;
 typedef void (*ScheduleFn)(struct FakeOS* os, void* args);
 
 typedef struct FakeOS{
-  FakePCB* running;
+  ListHead running; //***FakePCB* running
   ListHead ready;
   ListHead waiting;
   int timer;

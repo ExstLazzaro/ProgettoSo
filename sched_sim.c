@@ -17,8 +17,11 @@ void schedRR(FakeOS* os, void* args_){
   if (! os->ready.first)
     return;
 
+  while(os->ready.first) {
+
   FakePCB* pcb=(FakePCB*) List_popFront(&os->ready); //FA UN DETACH DEL PRIMO PROCESSO IN LISTA E LO RITORNA
-  os->running=pcb;
+  List_pushBack(&os->running,(ListItem*) pcb);
+  //os->running=pcb;
   
   assert(pcb->events.first);
   ProcessEvent* e = (ProcessEvent*)pcb->events.first;
@@ -35,7 +38,7 @@ void schedRR(FakeOS* os, void* args_){
     qe->duration=args->quantum;
     e->duration-=args->quantum;
     List_pushFront(&pcb->events, (ListItem*)qe);
-  }
+  } }
 };
 
 int main(int argc, char** argv) { //RICORDA ./PROGRAMMA ARG1 ARG2 ... (ARG[0] È SEMPRE NOME PROGRAMMA)
@@ -57,7 +60,7 @@ int main(int argc, char** argv) { //RICORDA ./PROGRAMMA ARG1 ARG2 ... (ARG[0] È
     }
   }
   printf("num processes in queue %d\n", os.processes.size);
-  while(os.running
+  while(os.running.first
         || os.ready.first
         || os.waiting.first
         || os.processes.first){
