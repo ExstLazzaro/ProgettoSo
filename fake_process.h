@@ -8,6 +8,9 @@ typedef struct {
   ListItem list; //OGNI EVENTO È UN LISTITEM.
   ResourceType type;
   int duration;
+  int fixateduration;
+  float quantum; //QUANTUM
+  float fixatedquantum;
 } ProcessEvent; //OGNI EVENTO HA DURATA E UNA RISORSA.
 
 // fake process

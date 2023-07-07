@@ -2,6 +2,10 @@
 #include "linked_list.h"
 #pragma once
 
+typedef struct {
+  float a;
+  int cpus;
+} SchedRRArgs;
 
 typedef struct {
   ListItem list;

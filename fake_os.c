@@ -64,7 +64,10 @@ void FakeOS_createProcess(FakeOS* os, FakeProcess* p) { //CREO PROCESSO P CON IL
 void FakeOS_simStep(FakeOS* os){
   
   printf("************** TIME: %08d **************\n", os->timer);
-
+  
+  float a = 0;
+  SchedRRArgs* args=(SchedRRArgs*) os->schedule_args;
+  a = args->a;
   //scan process waiting to be started
   //and create all processes starting now
   ListItem* aux=os->processes.first;
@@ -82,7 +85,7 @@ void FakeOS_simStep(FakeOS* os){
       free(new_process);
     }
   } //FINCHE CE UN PROCESSO DA SCANNERIZZARE CONTROLLO
-
+ 
   // scan waiting list, and put in ready all items whose event terminates
   aux=os->waiting.first; //VADO A PRENDERE CHI DEVE FARE IO IN WAITING LIST
   while(aux) {
@@ -94,6 +97,7 @@ void FakeOS_simStep(FakeOS* os){
     e->duration--; //DECREMENTO DURATA EVENTO BURST IO
     printf("\t\tremaining time:%d\n",e->duration); //----------------QUANTO RIMANE DI EVENTO SPECIFICO (IN QUESTO CASO IO)
     if (e->duration==0){//SE HO FINITO, POPPO L'EVENTO E LO LIBERO
+      float quanto=e->fixatedquantum;
       printf("\t\tend burst\n");
       List_popFront(&pcb->events);
       free(e);
@@ -105,6 +109,8 @@ void FakeOS_simStep(FakeOS* os){
       } else { //SENNÒ
         //handle next event
         e=(ProcessEvent*) pcb->events.first;
+        e->quantum = quanto;
+        e->fixatedquantum = quanto;
         switch (e->type){
         case CPU:
           printf("\t\tmove to ready\n");
@@ -135,10 +141,17 @@ void FakeOS_simStep(FakeOS* os){
     printf("\trunning pid: %d\n", pcb->pid);
     ProcessEvent* e=(ProcessEvent*) pcb->events.first;
     assert(e->type==CPU);
-    e->duration--; //DECREMENTO DURATA BURST CPU DI UNO
-    printf("\t\tremaining time:%d\n",e->duration); //----------------QUANTO RIMANE DI EVENTO SPECIFICO (IN QUESTO CASO CPU)
+    e->duration--;
+    e->quantum--; //DECREMENTO DURATA BURST CPU DI UNO
+    if((e->duration != 0) && (e->quantum <= 0)) {
+    printf("\t\tBurst should be finished, but it is not,---> reset quantum\n");
+    }
+    else {
+    printf("\t\texpected remaining time:%f\n",e->quantum);} //----------------QUANTO RIMANE DI EVENTO SPECIFICO (IN QUESTO CASO CPU)
     if (e->duration==0){
       printf("\t\tend burst\n");
+      float vecchioquanto=e->fixatedquantum;
+      int vecchiadurata=e->fixateduration;
       List_popFront(&pcb->events);
       free(e);
       List_detach(&os->running, (ListItem*)pcb);
@@ -147,6 +160,11 @@ void FakeOS_simStep(FakeOS* os){
         free(pcb); // SE ULTIMO EVENTO KILLO
       } else {
         e=(ProcessEvent*) pcb->events.first;
+        printf("durata che è stata %d, quanto vecchio %f \n",vecchiadurata,e->quantum);
+        e->quantum = (a * vecchiadurata) + ((1-a) * (vecchioquanto));
+        printf("processo numero %d ",pcb->pid);
+        printf("quanto vecchio %f, quanto nuovo %f \n",vecchioquanto,e->quantum);
+        e->fixatedquantum = e->quantum;
         switch (e->type){
         case CPU:
           printf("\t\tmove to ready\n");
@@ -171,9 +189,9 @@ void FakeOS_simStep(FakeOS* os){
 
   // if running not defined and ready queue not empty
   // put the first in ready to run
- if (! os->running.first && os->ready.first) {
+ /*if (! os->running.first && os->ready.first) {
      List_pushBack(&os->running, (ListItem*) os->ready.first);
-  } 
+  } */
 
 
 
