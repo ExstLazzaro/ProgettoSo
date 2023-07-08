@@ -40,8 +40,7 @@ int FakeProcess_load(FakeProcess* p, const char* filename) { //PROCESSO, LO CARI
       e->list.prev=e->list.next=0;
       e->type=CPU;
       e->duration=duration;
-      e->fixateduration = duration;
-
+      e->eventimer = 0;
       e->quantum=e->duration;
       e->fixatedquantum=e->quantum; //SEGNO LA DURATA CHE CARETTIRIZZA IL BURST
       List_pushBack(&p->events, (ListItem*)e);
@@ -57,7 +56,7 @@ int FakeProcess_load(FakeProcess* p, const char* filename) { //PROCESSO, LO CARI
       e->list.prev=e->list.next=0;
       e->type=IO;
       e->duration=duration;
-      e->fixateduration = duration;
+      e->eventimer = 0;
        //QUANTUM no
       List_pushBack(&p->events, (ListItem*)e);
       ++num_events;

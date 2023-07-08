@@ -94,9 +94,9 @@ void FakeOS_simStep(FakeOS* os){
     ProcessEvent* e=(ProcessEvent*) pcb->events.first;
     printf("\twaiting pid: %d\n", pcb->pid); //--------------------CHI È IN WAIT
     assert(e->type==IO);
-    e->duration--; //DECREMENTO DURATA EVENTO BURST IO
-    printf("\t\tremaining time:%d\n",e->duration); //----------------QUANTO RIMANE DI EVENTO SPECIFICO (IN QUESTO CASO IO)
-    if (e->duration==0){//SE HO FINITO, POPPO L'EVENTO E LO LIBERO
+    e->eventimer++; 
+    printf("\t\tremaining time:%d\n",(e->duration - e->eventimer)); //----------------QUANTO RIMANE DI EVENTO SPECIFICO (IN QUESTO CASO IO)
+    if (e->duration==e->eventimer){//SE HO FINITO, POPPO L'EVENTO E LO LIBERO
       float quanto=e->fixatedquantum;
       printf("\t\tend burst\n");
       List_popFront(&pcb->events);
@@ -141,17 +141,21 @@ void FakeOS_simStep(FakeOS* os){
     printf("\trunning pid: %d\n", pcb->pid);
     ProcessEvent* e=(ProcessEvent*) pcb->events.first;
     assert(e->type==CPU);
-    e->duration--;
+    e->eventimer++;
     e->quantum--; //DECREMENTO DURATA BURST CPU DI UNO
-    if((e->duration != 0) && (e->quantum <= 0)) {
+    if((e->duration != e->eventimer) && (e->quantum <= 0)) {
     printf("\t\tBurst should be finished, but it is not,---> reset quantum\n");
+    }
+    else if ((e->duration == e->eventimer) && (e->quantum <= 0)) {
+    
+
     }
     else {
     printf("\t\texpected remaining time:%f\n",e->quantum);} //----------------QUANTO RIMANE DI EVENTO SPECIFICO (IN QUESTO CASO CPU)
-    if (e->duration==0){
+    if (e->duration==e->eventimer){
       printf("\t\tend burst\n");
       float vecchioquanto=e->fixatedquantum;
-      int vecchiadurata=e->fixateduration;
+      int vecchiadurata=e->duration; 
       List_popFront(&pcb->events);
       free(e);
       List_detach(&os->running, (ListItem*)pcb);
@@ -160,10 +164,10 @@ void FakeOS_simStep(FakeOS* os){
         free(pcb); // SE ULTIMO EVENTO KILLO
       } else {
         e=(ProcessEvent*) pcb->events.first;
-        printf("durata che è stata %d, quanto vecchio %f \n",vecchiadurata,e->quantum);
+        //printf("durata che è stata %d, quanto vecchio %f \n",vecchiadurata,e->quantum);
         e->quantum = (a * vecchiadurata) + ((1-a) * (vecchioquanto));
-        printf("processo numero %d ",pcb->pid);
-        printf("quanto vecchio %f, quanto nuovo %f \n",vecchioquanto,e->quantum);
+        //printf("processo numero %d ",pcb->pid);
+        //printf("quanto vecchio %f, quanto nuovo %f \n",vecchioquanto,e->quantum);
         e->fixatedquantum = e->quantum;
         switch (e->type){
         case CPU:
@@ -180,22 +184,11 @@ void FakeOS_simStep(FakeOS* os){
   }
 
 
-  // call schedule, if defined
- // for(int i = 0; i < 2; i++) {
+
   if (os->schedule_fn){
     (*os->schedule_fn)(os, os->schedule_args); 
   } 
-  //}
-
-  // if running not defined and ready queue not empty
-  // put the first in ready to run
- /*if (! os->running.first && os->ready.first) {
-     List_pushBack(&os->running, (ListItem*) os->ready.first);
-  } */
-
-
-
-
+  
   ++os->timer;
 
 }
