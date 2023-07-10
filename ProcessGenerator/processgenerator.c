@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
+//INDICO IL MIO VALORE ATTESO DI LUNGHEZZA DEI BURST, DOPODICHE CON PROBABILITÀ 1/2 FACCIO UN TOT(CHE MI CALCOLO) DI TENTATIVI DOVE INCREMENTO DI 1 LA
+//DURATA DEL CORRISPONDENTE BURST QUANDO 1 (TRA VALORI (0,1))
 int main(int argc, char** argv) { 
 int nprocess = atoi(argv[1]);//quanti processi genero
 int nburst = atoi(argv[2]);//quanti burst avranno
@@ -26,14 +28,13 @@ printf("\n---------------------------\n");
 
 for(int i = 1; i <= nprocess;i++){
 int arrivaltime= rand()%6;
-char str0[20] = "../";
+
 char str1[20] = "p";
 char str2[20];
 char str3[20] = ".txt";
 sprintf(str2, "%d", i);
 char result[100];
-strcpy(result, str0);
-strcat(result, str1);  // Copy str1 into result
+strcpy(result, str1);  // Copy str1 into result
 strcat(result, str2);   // Add a space to result
 strcat(result, str3);
 FILE* f=fopen(result,"w");

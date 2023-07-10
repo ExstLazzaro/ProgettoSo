@@ -144,16 +144,18 @@ void FakeOS_simStep(FakeOS* os){
     e->eventimer++;
     e->quantum--; //DECREMENTO DURATA BURST CPU DI UNO
     if((e->duration != e->eventimer) && (e->quantum <= 0)) {
-    printf("\t\tBurst should be finished, but it is not,---> reset quantum\n");
+    printf("\t\tBurst should be finished, but it is not,---> recalcolate quantum\n");
     }
     else if ((e->duration == e->eventimer) && (e->quantum <= 0)) {
-    
+    printf("\t\tBurst finished when predicted\n");
 
     }
     else {
     printf("\t\texpected remaining time:%f\n",e->quantum);} //----------------QUANTO RIMANE DI EVENTO SPECIFICO (IN QUESTO CASO CPU)
     if (e->duration==e->eventimer){
       printf("\t\tend burst\n");
+      if(e->quantum >= 1) {
+      printf("\t\tBurst finished sooner than predicted\n");}
       float vecchioquanto=e->fixatedquantum;
       int vecchiadurata=e->duration; 
       List_popFront(&pcb->events);

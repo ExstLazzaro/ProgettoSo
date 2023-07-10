@@ -6,7 +6,7 @@
 FakeOS os;
 
 FakePCB * findmaxmin(int m,ListHead* head) {
-  
+//QUESTA FUNZIONE CON(M = 0) TROVA PROCESSO NELLA LISTA CON PRIMO EVENTO AVENTE EXPECTED REMAINING TIME MINORE (SE M = 1 UGUALE MA MAGGIORE)
 ListItem* aux=head->first;
 ListItem* auxx= head->first;
 int k;
@@ -49,15 +49,16 @@ void schedRR(FakeOS* os, void* args_){
   int k = 0;
   k = os->running.size;
   
-  for(int i=0; i < k; i++) { //CONTROLLO SE QUANTO ESAUIRITO
+  for(int i=0; i < k; i++) { //CONTROLLO SE QUANTO ESAUIRITO,IN CASO LO RICALCOLO
 
     FakePCB* pcb=(FakePCB*) List_popFront(&os->running);
     ProcessEvent* e = (ProcessEvent*)pcb->events.first;
     List_pushBack(&os->running,(ListItem*) pcb);
    
   if (e->quantum <= 0) {
+    printf("Regarding process with pid : %d\n",pcb->pid);
     printf("Old quantum %f\n",e->fixatedquantum);
-    e->quantum = ((args->a) * e->eventimer) + (((1) - args->a) * e->fixatedquantum);
+    e->quantum = ((args->a) * e->eventimer) + ((1 - args->a) * e->fixatedquantum);
     printf("New quantum %f\n",e->quantum);
     e->fixatedquantum += e->quantum;
     printf("Total of the prediction %f\n",e->fixatedquantum);
@@ -69,7 +70,7 @@ void schedRR(FakeOS* os, void* args_){
     return; }
   
 
-  //se non tutte occupate
+  //se le cpu non tutte occupate, prendo il minimo che ce da aspettare da ready e lo metto in running
   while(k < args->cpus && os->ready.first) {
    if(os->ready.size != 1) {
    FakePCB* pcb = findmaxmin(0,&os->ready);
@@ -84,7 +85,7 @@ void schedRR(FakeOS* os, void* args_){
    }
   }
 
-  //se tutte cpu occupate
+  //se tutte cpu occupate, controllo se in modo preemptive swappo qualcosa tra ready e running
   if(k == args->cpus && os->ready.first) {
   for(int i=0;i<os->ready.size;i++) {
   FakePCB* pcb1 = findmaxmin(0,&os->ready);

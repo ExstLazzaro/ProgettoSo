@@ -9,8 +9,8 @@ typedef struct {
   ResourceType type;
   int duration;
   float quantum; //QUANTUM
-  float fixatedquantum;
-  int eventimer;
+  float fixatedquantum;//TOTALE PREDICTION
+  int eventimer;//TIMER DI RUNNING
 } ProcessEvent; //OGNI EVENTO HA DURATA E UNA RISORSA.
 
 // fake process
