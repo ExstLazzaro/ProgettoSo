@@ -23,7 +23,9 @@ typedef struct FakeOS{
   int timer;
   ScheduleFn schedule_fn;
   void* schedule_args;
-
+  FILE* file;
+  int ncpuburst;
+  int nioburst;
   ListHead processes;
 } FakeOS; //STRUTTURA FINTO OS : HO PUNTATORE A PCB DEL RUNNING, LISTA READY E WAITING, UN TIMER, UNO SCHEDULER CON PUNTATORE AGLI ARGOMENTI. 
 //LISTA PROCESSI ANCHE.

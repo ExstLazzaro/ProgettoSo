@@ -11,6 +11,11 @@ void FakeOS_init(FakeOS* os) {
   List_init(&os->processes);
   os->timer=0;
   os->schedule_fn=0;
+  os->file=fopen("Dati.txt","w");
+  if (! os->file) {
+    return -1;}
+  os->ncpuburst = 0;
+  os->nioburst = 0;
 } //ALL'INIZIO TUTTO VUOTO
 
 void FakeOS_createProcess(FakeOS* os, FakeProcess* p) { //CREO PROCESSO P CON IL SUO PUNTATORE.
@@ -97,6 +102,8 @@ void FakeOS_simStep(FakeOS* os){
     e->eventimer++; 
     printf("\t\tremaining time:%d\n",(e->duration - e->eventimer)); //----------------QUANTO RIMANE DI EVENTO SPECIFICO (IN QUESTO CASO IO)
     if (e->duration==e->eventimer){//SE HO FINITO, POPPO L'EVENTO E LO LIBERO
+       os->nioburst++;
+      fprintf(os->file, "IO %d\n", e->eventimer);
       float quanto=e->fixatedquantum;
       printf("\t\tend burst\n");
       List_popFront(&pcb->events);
@@ -153,6 +160,8 @@ void FakeOS_simStep(FakeOS* os){
     else {
     printf("\t\texpected remaining time:%f\n",e->quantum);} //----------------QUANTO RIMANE DI EVENTO SPECIFICO (IN QUESTO CASO CPU)
     if (e->duration==e->eventimer){
+      os->ncpuburst++;
+      fprintf(os->file, "CPU %d\n", e->eventimer);
       printf("\t\tend burst\n");
       if(e->quantum >= 1) {
       printf("\t\tBurst finished sooner than predicted\n");}

@@ -116,7 +116,6 @@ int main(int argc, char** argv) { //PRIMO ARGOMENTO CORES,SECONDO VARIABILE a
   srr_args.cpus= atoi(argv[1]);
   os.schedule_args=&srr_args;
   os.schedule_fn=schedRR;
-  
   for (int i=1; i<argc -2; ++i){
     FakeProcess new_process;
     int num_events=FakeProcess_load(&new_process, argv[i+2]);
@@ -137,4 +136,7 @@ int main(int argc, char** argv) { //PRIMO ARGOMENTO CORES,SECONDO VARIABILE a
         || os.processes.first){
     FakeOS_simStep(&os); //FINCHE LISTE HANNO ELEMENTI CONTNUA CON QUESTA FUNZIONE
   }
+fprintf(os.file, "NCPU %d\n", os.ncpuburst);
+fprintf(os.file, "NIO %d\n", os.nioburst);
+fclose(os.file);
 }
