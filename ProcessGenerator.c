@@ -1,7 +1,17 @@
 #include "Pr.h"
 #include <stdlib.h>
 #include <stdio.h>
-void fetching(int listacpu[],int listaio[]) {
+#define MAX_BURST 100
+
+
+
+
+
+
+
+
+
+void fetching(int listacpu[],int listaio[],int * ncpus,int * nio) {
 
 
 int k = 0;
@@ -14,6 +24,7 @@ FILE* f=fopen("Dati.txt", "r");
   size_t line_length=0;
 
   while (getline(&buffer, &line_length, f) >0){ //PRENDO LA RIGA OGNI VOLTA
+  printf("\n%d %d \n",k,y);
     int num_tokens=0;
     int duration = -1;
 
@@ -31,6 +42,17 @@ FILE* f=fopen("Dati.txt", "r");
         y++;
     }//LEGGO IO BURST
 
+     num_tokens=sscanf(buffer, "NCPU %d", &duration);
+    if (num_tokens==1){
+        *ncpus = duration;
+    }//LEGGO IO BURST
+
+     num_tokens=sscanf(buffer, "NIO %d", &duration);
+    if (num_tokens==1){
+        *nio =duration;
+    }//LEGGO IO BURST
+
+
 
   }
   if (buffer)
@@ -42,22 +64,28 @@ int cmpfunc (const void * a, const void * b) {
    return ( *(int*)a - *(int*)b );
 }
 
-void order(int lista[]) {
-qsort(lista, 25, sizeof(int),cmpfunc);
+void order(int lista[],int n) {
+qsort(lista, n, sizeof(int),cmpfunc);
 }
 
 
 int main() {
-int listacpu[30];
-int listaio[30];
-fetching(listacpu,listaio);
-for(int i = 0;i< 25;i++) {
+printf("----------------------\n");
+int * ncpus = (int *) malloc(sizeof(int));
+int * nio = (int *) malloc(sizeof(int));
+
+int listacpu[MAX_BURST];
+int listaio[MAX_BURST];
+
+fetching(listacpu,listaio,ncpus,nio);
+printf("\nCOSA HO PRESO----------------------\n");
+for(int i = 0;i< *ncpus;i++) {
 printf("CPU %d\n",listacpu[i]);
 printf("IO %d\n",listaio[i]);}
-order(listacpu);
-order(listaio);
-printf("\n\n------------------\n\n");
-for(int i = 0;i< 25;i++) {
+order(listacpu,*ncpus);
+order(listaio,*nio);
+printf("\n\nECCO ORDINATO------------------\n\n");
+for(int i = 0;i< *ncpus;i++) {
 printf("CPU %d\n",listacpu[i]);
 printf("IO %d\n",listaio[i]);}
 return 1;

@@ -9,6 +9,6 @@ typedef struct ListaBurst {
   int size;
 } ListaBurst;
 
-void fetching(int listacpu[],int listaio[]);
-void order(int lista[]);
+void fetching(int listacpu[],int listaio[],int * ncpus,int * nio);
+void order(int lista[],int n);
 int cmpfunc (const void * a, const void * b);
