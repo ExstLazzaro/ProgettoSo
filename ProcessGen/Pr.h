@@ -25,3 +25,4 @@ ElementoBurst* List_find(ListaBurst* head, int dato);
 void List_print(ListaBurst* head);
 void Setting_up(ListaBurst* head,int n);
 ElementoBurst* RandomChosen(ListaBurst* head, int dato);
+void PlotFile(ListaBurst* head,int mode);

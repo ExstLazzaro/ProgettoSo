@@ -161,6 +161,35 @@ void order(int lista[],int n) {
 qsort(lista, n, sizeof(int),cmpfunc);
 }
 
+void PlotFile(ListaBurst* head,int mode) {
+  FILE *fp=NULL;
+  if(mode == 1) {
+  fp=fopen("graphcpu.txt","w"); }
+  else {
+  fp=fopen("graphio.txt","w");
+  }
+  fprintf(fp,"%d\t%f\n",0,(float)0);
+  int i = 1;
+ ElementoBurst* aux=head->first;
+  while(aux){
+    if(i <  aux->durata) {
+      fprintf(fp,"%d\t%f\n",i,aux->px);
+
+    }
+    else if (i == aux->durata) {
+      fprintf(fp,"%d\t%f\n",i,aux->px);
+      aux = aux->next;
+
+
+    }
+    i++;
+
+
+  }
+  fprintf(fp,"%d\t%f\n",i,(float)1);
+  fclose(fp);
+
+}
 
 int main(int argc, char** argv) {
 int nprocess = atoi(argv[1]);//quanti processi genero
@@ -243,8 +272,8 @@ Setting_up(iobursts,*nio);
 
 
 
-
-
+PlotFile(cpubursts,1);
+PlotFile(iobursts,0);
 
 
 
