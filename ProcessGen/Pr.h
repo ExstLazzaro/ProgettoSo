@@ -26,3 +26,5 @@ void List_print(ListaBurst* head);
 void Setting_up(ListaBurst* head,int n);
 ElementoBurst* RandomChosen(ListaBurst* head, int dato);
 void PlotFile(ListaBurst* head,int mode);
+int minrange(ListaBurst* head,ElementoBurst* target);
+void PlotData(ListaBurst* head,int mode);

@@ -92,7 +92,7 @@ void Setting_up(ListaBurst* head,int n) {
     aux->upperbound =  (aux->px * 100);
 
     }
-    printf("La durata %d ha prob %f e lower b %f e upper b %f\n",aux->durata,aux->px,aux->lowerbound,aux->upperbound);
+    printf("La durata %d ha prob <X  %f e lower bound %f e upper bound %f\n",aux->durata,aux->px,aux->lowerbound,aux->upperbound);
     preprob = aux->px;
     prevb = aux->upperbound;
     aux = aux->next;
@@ -191,6 +191,51 @@ void PlotFile(ListaBurst* head,int mode) {
 
 }
 
+
+
+
+void PlotData(ListaBurst* head,int mode) {
+  FILE *fp=NULL;
+  if(mode == 1) {
+  fp=fopen("datacpu.txt","w"); }
+  else {
+  fp=fopen("dataio.txt","w");
+  }
+  int i = 0;
+ ElementoBurst* aux=head->first;
+  while(aux){
+ if (i == aux->durata) {
+      fprintf(fp,"%d\t%d\n",i,aux->occorrenza);
+      aux = aux->next;
+      }
+  else {
+    fprintf(fp,"%d\t%d\n",i,0); }
+    i++;
+
+
+  }
+  fclose(fp);
+
+}
+
+
+int minrange(ListaBurst* head,ElementoBurst* target) {
+
+ElementoBurst* aux=head->first;
+if((head->first->durata) == target->durata) {
+return 1;
+}
+
+  while(aux){
+    if((aux->next->durata) == (target->durata)) {
+      return aux->durata;
+     }
+    aux=aux->next;
+  }
+  return 1;
+
+}
+
 int main(int argc, char** argv) {
 int nprocess = atoi(argv[1]);//quanti processi genero
 int nburst = atoi(argv[2]);//quanti burst avranno
@@ -270,8 +315,8 @@ Setting_up(iobursts,*nio);
 
 
 
-
-
+PlotData(cpubursts,1);
+PlotData(iobursts,0);
 PlotFile(cpubursts,1);
 PlotFile(iobursts,0);
 
@@ -281,7 +326,7 @@ srand(time(NULL)); //Genera un seed diverso ogni volta
 for(int i = 1; i <= nprocess;i++){
 int arrivaltime= rand()%6;
 
-char str1[20] = "p";
+char str1[20] = "../p";
 char str2[20];
 char str3[20] = ".txt";
 sprintf(str2, "%d", i);
@@ -307,15 +352,17 @@ if (cpu) {
 
 ElementoBurst * val = RandomChosen(cpubursts,random);
 printf("cpu Chosen %d      ",random);
-fprintf(f, "CPU_BURST %d\n", val->durata);
+int randv = rand() % (val->durata - minrange(cpubursts,val) ) + ( minrange(cpubursts,val) );
+fprintf(f, "CPU_BURST %d\n", randv);
 cpu = false;
 
 }
 
 else {
-  ElementoBurst * val = RandomChosen(iobursts,random);
+ElementoBurst * val = RandomChosen(iobursts,random);
 printf("io Chosen %d      ",random);
-fprintf(f, "IO_BURST %d\n", val->durata);
+int randv = rand() % (val->durata - minrange(iobursts,val) ) + ( minrange(iobursts,val) );
+fprintf(f, "IO_BURST %d\n", randv);
 cpu = true;
      
 
