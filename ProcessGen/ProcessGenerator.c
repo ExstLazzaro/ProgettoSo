@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <string.h>
+#include <time.h>
 #define MAX_BURST 100
 
 void List_inizializzazione(ListaBurst* list) {
@@ -45,6 +46,20 @@ ElementoBurst* List_find(ListaBurst* head, int dato) {
   while(aux){
     if (aux->durata==dato)
       return aux;
+    aux=aux->next;
+  }
+  return NULL;
+}
+
+
+
+ElementoBurst* RandomChosen(ListaBurst* head, int dato) {
+  // linear scanning of list
+  float datof = (float) dato;
+  ElementoBurst* aux=head->first;
+  while(aux){
+    if ( (datof >= aux->lowerbound) && (datof <= aux->upperbound) ) {
+      return aux; }
     aux=aux->next;
   }
   return NULL;
@@ -94,7 +109,7 @@ void fetching(int listacpu[],int listaio[],int * ncpus,int * nio) {
 
 int k = 0;
 int y = 0;
-FILE* f=fopen("Dati.txt", "r");
+FILE* f=fopen("../Dati.txt", "r");
   if (! f)
     return ;
   // read the PID
@@ -233,7 +248,7 @@ Setting_up(iobursts,*nio);
 
 
 
-/*
+srand(time(NULL)); //Genera un seed diverso ogni volta
 for(int i = 1; i <= nprocess;i++){
 int arrivaltime= rand()%6;
 
@@ -254,15 +269,25 @@ fprintf(f, "PROCESS %d %d\n", i,arrivaltime);
 
 
 for(int j=0;j<nburst;j++){
+ printf("Process number %d -----------------\n",i);
 
  int contatore = 0;
+ int random = rand() % 100;
 
 if (cpu) {
-      
+
+ElementoBurst * val = RandomChosen(cpubursts,random);
+printf("cpu Chosen %d      ",random);
+fprintf(f, "CPU_BURST %d\n", val->durata);
+cpu = false;
 
 }
 
 else {
+  ElementoBurst * val = RandomChosen(iobursts,random);
+printf("io Chosen %d      ",random);
+fprintf(f, "IO_BURST %d\n", val->durata);
+cpu = true;
      
 
     }
@@ -279,7 +304,6 @@ else {
 
 
 
-*/
 
 
 
