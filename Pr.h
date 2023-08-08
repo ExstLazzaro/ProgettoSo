@@ -3,6 +3,9 @@ typedef struct ElementoBurst {
   struct ElementoBurst* next;
   int durata;
   int occorrenza;
+  float px; //PROBABILITA x<Durata
+  float lowerbound;
+  float upperbound;
 
 } ElementoBurst;
 
@@ -20,3 +23,4 @@ ElementoBurst* List_insert(ListaBurst* head, ElementoBurst* prev, ElementoBurst*
 ElementoBurst* List_pushBack(ListaBurst* head, ElementoBurst* item);
 ElementoBurst* List_find(ListaBurst* head, int dato);
 void List_print(ListaBurst* head);
+void Setting_up(ListaBurst* head,int n);

@@ -1,6 +1,8 @@
 #include "Pr.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdbool.h>
+#include <string.h>
 #define MAX_BURST 100
 
 void List_inizializzazione(ListaBurst* list) {
@@ -54,6 +56,32 @@ void List_print(ListaBurst* head) {
   while(aux){
     printf("Burst che ha Durata %d e Occorrenza %d\n",aux->durata,aux->occorrenza);
     aux=aux->next;
+  }
+  printf("\n---------------------------------\n");
+  
+}
+
+void Setting_up(ListaBurst* head,int n) {
+  // linear scanning of list
+  head->first->lowerbound = 0;
+  head->last->upperbound = 100;
+  ElementoBurst* aux=head->first;
+  float prevb = 0;
+  float preprob = 0;
+  float q = (float)n;
+  while(aux){
+    aux->px = preprob + ((aux->occorrenza)/q );
+
+    aux->lowerbound = prevb;
+    if(aux->upperbound != 100) {
+    aux->upperbound =  (aux->px * 100);
+
+    }
+    printf("La durata %d ha prob %f e lower b %f e upper b %f\n",aux->durata,aux->px,aux->lowerbound,aux->upperbound);
+    preprob = aux->px;
+    prevb = aux->upperbound;
+    aux = aux->next;
+    
   }
   printf("\n---------------------------------\n");
   
@@ -119,10 +147,12 @@ qsort(lista, n, sizeof(int),cmpfunc);
 }
 
 
-int main() {
+int main(int argc, char** argv) {
+int nprocess = atoi(argv[1]);//quanti processi genero
+int nburst = atoi(argv[2]);//quanti burst avranno
 printf("----------------------\n");
-int * ncpus = (int *) malloc(sizeof(int));
-int * nio = (int *) malloc(sizeof(int));
+int * ncpus = (int *) malloc(sizeof(int)); //TOTALE OCCORRENZE CPU
+int * nio = (int *) malloc(sizeof(int)); //TOTALE OCCORRENZE IO
 
 int listacpu[MAX_BURST];
 int listaio[MAX_BURST];
@@ -188,6 +218,97 @@ printf("quanti cpu bursts %d \n",cpubursts->size);
 printf("quanti io bursts %d \n",iobursts->size);
 List_print(cpubursts);
 List_print(iobursts);
+
+
+Setting_up(cpubursts,*ncpus);
+Setting_up(iobursts,*nio);
+//INIZIALIZZO PROB E LOWE/UPPER BOUND
+
+
+
+
+
+
+
+
+
+
+/*
+for(int i = 1; i <= nprocess;i++){
+int arrivaltime= rand()%6;
+
+char str1[20] = "p";
+char str2[20];
+char str3[20] = ".txt";
+sprintf(str2, "%d", i);
+char result[100];
+strcpy(result, str1);  // Copy str1 into result
+strcat(result, str2);   // Add a space to result
+strcat(result, str3);
+FILE* f=fopen(result,"w");
+ if (! f) {
+    return -1;}
+
+bool cpu = true;//inizio sempre con evento cpu
+fprintf(f, "PROCESS %d %d\n", i,arrivaltime);
+
+
+for(int j=0;j<nburst;j++){
+
+ int contatore = 0;
+
+if (cpu) {
+      
+
+}
+
+else {
+     
+
+    }
+
+  
+}
+
+
+  fclose(f);
+  printf("Processo numero : %d completato!\n",i);
+}
+
+
+
+
+
+*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
