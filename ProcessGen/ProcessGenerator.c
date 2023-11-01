@@ -223,7 +223,7 @@ int minrange(ListaBurst* head,ElementoBurst* target) {
 
 ElementoBurst* aux=head->first;
 if((head->first->durata) == target->durata) {
-return 1;
+return 0;
 }
 
   while(aux){
@@ -344,18 +344,15 @@ fprintf(f, "PROCESS %d %d\n", i,arrivaltime);
 
 for(int j=0;j<nburst;j++){
  printf("Process number %d -----------------\n",i);
-
  int contatore = 0;
  int random = rand() % 100;
 
 if (cpu) {
-
 ElementoBurst * val = RandomChosen(cpubursts,random);
 printf("cpu Chosen %d      ",random);
 int randv = rand() % (val->durata - minrange(cpubursts,val) ) + ( minrange(cpubursts,val) );
 fprintf(f, "CPU_BURST %d\n", randv);
 cpu = false;
-
 }
 
 else {
@@ -364,7 +361,6 @@ printf("io Chosen %d      ",random);
 int randv = rand() % (val->durata - minrange(iobursts,val) ) + ( minrange(iobursts,val) );
 fprintf(f, "IO_BURST %d\n", randv);
 cpu = true;
-     
 
     }
 
