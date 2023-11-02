@@ -69,15 +69,15 @@ void List_print(ListaBurst* head) {
   // linear scanning of list
   ElementoBurst* aux=head->first;
   while(aux){
-    printf("Burst che ha Durata %d e Occorrenza %d\n",aux->durata,aux->occorrenza);
+    printf("> é presente un burst di durata %d e con occorrenza %d\n",aux->durata,aux->occorrenza);
     aux=aux->next;
   }
-  printf("\n---------------------------------\n");
+  printf("\n--------------------------------------------------\n");
   
 }
 
 void Setting_up(ListaBurst* head,int n) {
-  // linear scanning of list
+  //Preparo la struttura dati della lista dei burst, impostando le varie probabilità
   head->first->lowerbound = 0;
   head->last->upperbound = 100;
   ElementoBurst* aux=head->first;
@@ -98,7 +98,7 @@ void Setting_up(ListaBurst* head,int n) {
     aux = aux->next;
     
   }
-  printf("\n---------------------------------\n");
+  printf("\n--------------------------------------------------\n");
   
 }
 
@@ -117,7 +117,6 @@ FILE* f=fopen("../Dati.txt", "r");
   size_t line_length=0;
 
   while (getline(&buffer, &line_length, f) >0){ //PRENDO LA RIGA OGNI VOLTA
-  //printf("\n%d %d \n",k,y);
     int num_tokens=0;
     int duration = -1;
 
@@ -138,12 +137,12 @@ FILE* f=fopen("../Dati.txt", "r");
      num_tokens=sscanf(buffer, "NCPU %d", &duration);
     if (num_tokens==1){
         *ncpus = duration;
-    }//LEGGO IO BURST
+    }//Leggo il numero totale dei cpu burst alla fine
 
      num_tokens=sscanf(buffer, "NIO %d", &duration);
     if (num_tokens==1){
         *nio =duration;
-    }//LEGGO IO BURST
+    }//Leggo il numero totale dei io burst alla fine
 
 
 
@@ -223,7 +222,7 @@ int minrange(ListaBurst* head,ElementoBurst* target) {
 
 ElementoBurst* aux=head->first;
 if((head->first->durata) == target->durata) {
-return 0;
+return 1;
 }
 
   while(aux){
@@ -239,26 +238,17 @@ return 0;
 int main(int argc, char** argv) {
 int nprocess = atoi(argv[1]);//quanti processi genero
 int nburst = atoi(argv[2]);//quanti burst avranno
-printf("----------------------\n");
+printf("--------------------------------------------------\n");
 int * ncpus = (int *) malloc(sizeof(int)); //TOTALE OCCORRENZE CPU
 int * nio = (int *) malloc(sizeof(int)); //TOTALE OCCORRENZE IO
 
-int listacpu[MAX_BURST];
+int listacpu[MAX_BURST]; //Posso avere al massimo 100 burst cpu/io
 int listaio[MAX_BURST];
 
-fetching(listacpu,listaio,ncpus,nio);
-/*printf("\nCOSA HO PRESO----------------------\n");
-for(int i = 0;i< *ncpus;i++) {
-printf("CPU %d\n",listacpu[i]);
-printf("IO %d\n",listaio[i]);} */
-order(listacpu,*ncpus);
+fetching(listacpu,listaio,ncpus,nio); //Raccolgo i dati sui vari burst, da una precedente esecuzione di sched_sim
+order(listacpu,*ncpus); //ordino con quicksort le liste
 order(listaio,*nio);
-/*
-printf("\n\nECCO ORDINATO------------------\n\n");
-for(int i = 0;i< *ncpus;i++) {
-printf("CPU %d\n",listacpu[i]);
-printf("IO %d\n",listaio[i]);
-} */
+
 
 ListaBurst * cpubursts = (ListaBurst *) malloc(sizeof(ListaBurst));
 ListaBurst * iobursts = (ListaBurst *) malloc(sizeof(ListaBurst));
@@ -303,13 +293,14 @@ List_pushBack(iobursts,new);
 
 
 
-printf("quanti cpu bursts %d \n",cpubursts->size);
-printf("quanti io bursts %d \n",iobursts->size);
-List_print(cpubursts);
+printf("Sono stati generati %d valori di CPU Burst\n\n",cpubursts->size);
+List_print(cpubursts); //Faccio una semplice inizializzazione per le liste
+printf("Sono stati generati %d valori di IO Burst\n\n",iobursts->size);
 List_print(iobursts);
 
-
+printf("\n----------------Probabilità dei vari CPU Burst-----------------\n");
 Setting_up(cpubursts,*ncpus);
+printf("\n----------------Probabilità dei vari IO Burst-----------------\n");
 Setting_up(iobursts,*nio);
 //INIZIALIZZO PROB E LOWE/UPPER BOUND
 
@@ -323,6 +314,9 @@ PlotFile(iobursts,0);
 
 
 srand(time(NULL)); //Genera un seed diverso ogni volta
+
+
+printf("----------------------------------------------------------------------------------------------------------\n");
 for(int i = 1; i <= nprocess;i++){
 int arrivaltime= rand()%6;
 
@@ -343,22 +337,23 @@ fprintf(f, "PROCESS %d %d\n", i,arrivaltime);
 
 
 for(int j=0;j<nburst;j++){
- printf("Process number %d -----------------\n",i);
  int contatore = 0;
  int random = rand() % 100;
 
 if (cpu) {
-ElementoBurst * val = RandomChosen(cpubursts,random);
-printf("cpu Chosen %d      ",random);
-int randv = rand() % (val->durata - minrange(cpubursts,val) ) + ( minrange(cpubursts,val) );
+ElementoBurst * val = RandomChosen(cpubursts,random); //Trovo il valore del burst che è nel range trovato dal numero random
+printf("Random number chosen : %d  --->    ",random);
+int randv = rand() % (val->durata - minrange(cpubursts,val) + 1) + ( minrange(cpubursts,val) );
+printf("Così abbiamo scelto come durata del cpu burst : %d      \n",randv);
 fprintf(f, "CPU_BURST %d\n", randv);
 cpu = false;
 }
 
 else {
 ElementoBurst * val = RandomChosen(iobursts,random);
-printf("io Chosen %d      ",random);
-int randv = rand() % (val->durata - minrange(iobursts,val) ) + ( minrange(iobursts,val) );
+printf("Random number chosen : %d  --->    ",random);
+int randv = rand() % (val->durata - minrange(iobursts,val) +1 ) + ( minrange(iobursts,val) );  
+printf("Così abbiamo scelto come durata del io burst : %d      \n",randv);
 fprintf(f, "IO_BURST %d\n", randv);
 cpu = true;
 
@@ -370,6 +365,7 @@ cpu = true;
 
   fclose(f);
   printf("Processo numero : %d completato!\n",i);
+  printf("----------------------------------------------------------------------------------------------------------\n");
 }
 
 
