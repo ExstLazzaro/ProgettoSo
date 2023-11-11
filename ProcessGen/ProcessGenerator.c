@@ -293,9 +293,9 @@ List_pushBack(iobursts,new);
 
 
 
-printf("Sono stati generati %d valori di CPU Burst\n\n",cpubursts->size);
+printf("Sono stati rilevati %d valori differenti di CPU Burst nell'esecuzione dello scheduler simulator\n\n",cpubursts->size);
 List_print(cpubursts); //Faccio una semplice inizializzazione per le liste
-printf("Sono stati generati %d valori di IO Burst\n\n",iobursts->size);
+printf("Sono stati rilevati %d valori differenti di CPU Burst nell'esecuzione dello scheduler simulator\n\n",iobursts->size);
 List_print(iobursts);
 
 printf("\n----------------Probabilità dei vari CPU Burst-----------------\n");
